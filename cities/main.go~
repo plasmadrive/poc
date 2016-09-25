@@ -1,0 +1,61 @@
+package main
+
+import("fmt"
+//"encoding/json"
+"net/http"
+)
+
+
+
+type City struct {
+	displayName string
+	cityGeoId string
+	cityName string
+	areaGeoId string
+	areaName string
+	countryGeoId string
+	countryName string
+	portIndicator bool
+
+}
+
+/*
+func retrieveCitiesByName(name string) []City {
+	city1 := City{
+		displayName: "Felixstowe,Kent,United Kingdom",
+		cityGeoId: "1",
+		cityName: "Felixstowe",
+		areaGeoId: "2",
+		areaName: "Kent",
+		countryGeoId: "3",
+		countryName: "United Kingodom",
+		portIndicator: true,
+	}
+
+	cityList := []City{city1}
+	return cityList
+
+}
+
+*/
+func cityHandler(w http.ResponseWriter, r *http.Request) {
+	query := r.URL
+	//citySearchCriteria := query["citySearchCriteria"]
+
+//	w.Header().Set("Content-Type","text/html")
+//	w.WriteHeader(200)
+	fmt.Fprintln(w,query)
+	
+}
+
+func main() {
+	server := http.Server{
+		Addr: "localhost:8080",
+	}
+	http.HandleFunc("/cities/", cityHandler)
+
+	server.ListenAndServe()
+	
+	
+
+}
