@@ -30,7 +30,7 @@ func init() {
 
 
 type CityDaoImpl struct {}
-func RetrieveCitiesByName(CityDaoImpl) (name string) []types.City {
+func (c CityDaoImpl) RetrieveCitiesByName) (name string) []types.City {
 	queryString := fmt.Sprintf("select city_geo_id,city_name,display_name,area_geo_id,area_name,country_geo_id,country_name,port_indicator from cities where \"prefix\" = $1")
 	fmt.Printf("Query string is : %v\n",queryString)
 	fmt.Printf("name is : %s",name)

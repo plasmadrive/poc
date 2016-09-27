@@ -1,57 +1,30 @@
 package data
 
-import ("database/sql"
-	"fmt"
-	_ "github.com/lib/pq"
-)
+import ("fmt"
+"maersk/poc/types")
 
-type City struct {
-	CityGeoId string
-	CityName string
-	DisplayName string
-	AreaGeoId string
-	AreaName string
-	CountryGeoId string
-	CountryName string
-	PortIndicator bool
+type CityDao interface {
+	RetrieveCitiesByPrefix(prefix string)  []types.City
 }
 
-var Db *sql.DB
+
+var daoMap map[string]types.CityDao
+
 func init () {
-	var err error
-	Db,err = sql.Open("postgres","user=postgres dbname=poc password=passw0rd sslmode=disable")
-	if err != nil {
-		panic(err)
+	daoMap = make(map[string]types.CityDao)
+}
+
+func RegisterCityDao(x string,dao types.CityDao) {
+	daoMap[x] = dao
+
+}
+
+func RetrieveCitiesByPrefix(PersistenceType string,CityPrefix string) []types.City, error {
+	citydao,exists := daoMap[PersistenceType]
+	if exists {
+		return citydao.RetrieveCitiesByPrefix(CityPrefix), nil
+	} else {
+		return nil,fmt.Errorf("No dao found for %s",CityPrefix)
 	}
 }
 
-
-func RetrieveCitiesByName(name string) []City {
-	queryString := fmt.Sprintf("select city_geo_id,city_name,display_name,area_geo_id,area_name,country_geo_id,country_name,port_indicator from cities where city_name like %v ||'%%'","$1")
-	fmt.Printf("Query string is : %v\n",queryString)
-	fmt.Printf("name is : %s",name)
-	stmnt,err := Db.Prepare(queryString)
-	fmt.Println("statement created")
-
-	rows,err := stmnt.Query(name)
-	if err != nil {
-		panic(err)
-	}
-	cities := make([]City,0)
-	for rows.Next() {
-		city := City{}
-		err := rows.Scan(&city.CityGeoId,
-			&city.CityName,
-			&city.DisplayName,
-			&city.AreaGeoId,
-			&city.AreaName,
-			&city.CountryGeoId,
-			&city.CountryName,
-			&city.PortIndicator)
-		if err != nil {
-			panic(err)
-		} 
-		cities = append(cities,city)
-	}
-	return cities
-}
