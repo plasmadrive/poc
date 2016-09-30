@@ -1,0 +1,53 @@
+Feature:  A locations API that retrieves a list of locations starting with two or more characters
+  In order to pupulate a locations typeahead list I need to retrieve the locations that start with two characters
+         
+  Scenario Outline:  Retrieve a list of locations whose name begins with  <chars> for a Maersk group brand <<brand>>
+    Given the locations API deployed on <host>
+    And <chars> is two characters at the start of a location name
+    When I perform a GET on the <hots>/locations URL
+    And the query parameter LocationNamePrefix is equal to <chars>
+    And the query parameter Brand is equal to <<brand>>
+    Then I receive an HTTP 200 response
+    And the Content-Type is application/json
+    And the
+    And the JSON should look like """ 
+    [
+       {"GeoId" : "xxxx",
+       "DisplayName" : "<chars>RestOfCityName StateName CountryName",
+       "LocationType" : "CY or empty"
+      }
+      ]
+"""
+    Examples:
+    | chars | brand | json                                                                                       |
+    | Fe    | ML    | [{"GeoId": "1", "DisplayName": "Felixstowe,Suffolk, United Kingdom","LocationType": "CY"}] |
+
+
+# The scenarios below are test scenarios to test functionality of the API gateway during a POC / Trial phase
+Scenario Outline: Requests from an IP address <aaa.bbb.ccc.ddd> are rejected
+  Given the locations API exposed on the API Gateway
+  But the gateway has a policy has a policy to reject requests from <aaa.bbb.ccc.dddd> to /locations
+  When I perform a GET on the /locations URL
+  And the query parameter has at least two characters
+  Then I receive an HTTP 403 response
+
+
+Scenario Outline: Requests from a customer with code <XYZ> are limited to <x> calls per second
+  Given the locations API is exposed on the API Gateway
+  And I have a customer code of <XYZ> 
+  And I have authenticated with Azure AD via the Open ID Connect service
+  And I have made <x> requests to the /locations URL in the last second
+  But the API gateway has a policy configured to throttle requests with Customer Code <XYZ> to <x> calls per second
+  When I make a GET request to the /locations API
+  Then I receive a HTTP 200 response
+  And the HTTP Content-Type is application/json
+  But the response will be delayed 
+
+
+       
+Scenario: Requests containing sql code must be rejected
+  Given the locations exposed on the API Gateway
+  But the API Gateway has a policy to reject requests containing SQL code
+  When I make a GET request to the /locations API
+  And the request parameter contains sql """DROP TABLE LOCATIONS"
+  Then I receive an HTTP 400 response
