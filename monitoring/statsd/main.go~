@@ -1,0 +1,21 @@
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+func oneHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Page 1")
+}
+
+func twoHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Page 2")
+}
+
+func main() {
+	http.HandleFunc("one", oneHandler)
+	http.HandleFunc("two", twoHandler)
+
+	http.ListenAndServe(":8080", nil)
+}
