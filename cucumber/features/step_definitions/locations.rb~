@@ -1,0 +1,40 @@
+require 'net/http'
+
+
+
+Given(/^that "([^"]*)" has length of two$/) do |arg1|
+  arg1.length.should == 2
+  @location_name_prefix = arg1
+end
+
+Given(/^"([^"]*)" is one of 'MAEU','SAFM','MCPU','SEJJ','SEAU'$/) do |arg1|
+#  arg1.should == 'MAEU' or arg1.should == 'SAFM' or  arg1.should == 'MCPU' or arg1.should or 'SEJJ' or  arg1.should == 'SEAU'
+  expect(arg1).to eq('MAEU').or eq('SAFM').or eq('MCPU').or eq('SEJJ').or eq('SEAU')
+  @scac = arg1
+end
+
+#When(/^I send a GET request to \/locations\?LocationNamePrefix=<Fe>SCAC=<<brand>>$/) do
+ #  uri = URI('http://www.google.co.uk')
+
+#end
+
+When(/^I send a GET request to "([^"]*)"$/) do |arg1|
+  uri = URI('https://app.apiary.io/locations15')
+  params = {:LocationNamePrefix => @location_name_prefix, :SCAC => @scac}
+  uri.query = URI.encode_www_form(params)
+  @res = Net::HTTP.get_response(uri)
+
+end
+
+Then(/^the response code should be "([^"]*)"$/) do |arg1|
+  @res.code.should == arg1
+end
+
+Then(/^the content type should be "([^"]*)"$/) do |arg1|
+ @content_type = @res.get_fields('Content-Type')[0]
+ @content_type.should equal 
+end
+
+Then(/^the JSON response should have the form "([^"]*)"GeoId"([^"]*)"x"([^"]*)"DisplayName"([^"]*)"yyyy"([^"]*)"LocationType"([^"]*)"port"([^"]*)"$/) do |arg1, arg2, arg3, arg4, arg5, arg6, arg7|
+  pending # Write code here that turns the phrase above into concrete actions
+end
